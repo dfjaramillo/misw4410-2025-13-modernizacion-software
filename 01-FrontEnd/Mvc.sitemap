@@ -1,0 +1,23 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<mvcSiteMap xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+            xmlns="http://mvcsitemap.codeplex.com/schemas/MvcSiteMap-File-4.0"
+            xsi:schemaLocation="http://mvcsitemap.codeplex.com/schemas/MvcSiteMap-File-4.0 MvcSiteMapSchema.xsd">
+
+  <mvcSiteMapNode title="Home" controller="Home" action="Index">
+    <mvcSiteMapNode title="Evaluaciones" controller="Evaluacion" action="Index">
+      <mvcSiteMapNode title="Detalles Evaluación" controller="Evaluacion" action="EvalDetalles"/>     
+      <mvcSiteMapNode title="Configuración Evaluación" controller="Evaluacion" action="EvalConfig"/>
+      <mvcSiteMapNode title="Evaluación Usuario" controller="Evaluacion" action="EvaluacionUsuario"/>
+    </mvcSiteMapNode>    
+    <mvcSiteMapNode title="Formularios" controller="Formulario" action="Index">
+      <mvcSiteMapNode title="Detalle Formulario" controller="Formulario" action="FormDetalles" preservedRouteParameters="id"/>      
+    </mvcSiteMapNode>  
+    <mvcSiteMapNode title="Preguntas" controller="Pregunta" action="Index" preservedRouteParameters="id">
+      <mvcSiteMapNode title="Detalle Pregunta" controller="Pregunta" action="DetPregunta"/>
+    </mvcSiteMapNode>
+    <mvcSiteMapNode title="Respuestas" controller="Respuesta" action="Index" preservedRouteParameters="id">
+    <mvcSiteMapNode title="Detalle Respuesta" controller="Respuesta" action="DetRespuesta"/>
+  </mvcSiteMapNode>
+    <mvcSiteMapNode title="Usuarios" controller="Account" action="Register"/>    
+  </mvcSiteMapNode>  
+</mvcSiteMap>

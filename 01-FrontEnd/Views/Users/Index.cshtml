@@ -1,0 +1,49 @@
+﻿@model List<Model.Custom.UsuarioGridView.UserForGridView>
+@{
+    ViewBag.Title = "Usuarios";
+}
+
+<h2 class="page-header">@ViewBag.Title</h2>
+
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Nombre</th>
+            <th>Email</th>
+            <th>Habilitar/deshabilitar</th>
+            <th>Roles</th>
+            <th>Editar Usuario</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var m in Model)
+        {
+            <tr>
+                <td>@m.Name @m.LastName</td>
+                <td>@m.Email</td>
+                @using (Html.BeginForm("HabilitarUsuario", "Users", FormMethod.Post))
+                {
+                    if (m.Enable)
+                    {
+                        <td>
+                            <button type="submit" id="value" name="value" class="btn btn-danger" value="@m.Id">Deshabilitar</button>
+                        </td>
+                    }
+                    else
+                    {
+                        <td>
+                            <button type="submit" id="value" name="value" class="btn btn-info" value="@m.Id">Habilitar</button>
+                        </td>
+                    }
+                }
+                <td>
+                    <a class="btn btn-info" href="@Url.Action("Get", "Users", new {id = m.Id})">Asignar Rol</a>
+                </td>
+                <td>
+                    <a class="btn btn-info" href="@Url.Action("EditUser", "Account", new {userId = m.Id})">Editar</a>
+                </td>
+                <td>@string.Join(", ", m.Roles)</td>
+            </tr>
+        }
+    </tbody>
+</table>

@@ -1,0 +1,144 @@
+﻿@model Model.Custom.RespuestaGridView.RespuestaViewModel
+@{
+    ViewBag.Title = "Informe Individual";
+}
+<form action="DownloadViewPDF" method="post">
+    @if (Model != null && Model.Respuesta != null)
+    {
+        <div class="row">
+            <div class="col-md-12">
+                <button class="btn btn-brown pull-right" type="submit" style="width:70px"><i class="fa fa-file-pdf-o"></i></button>
+                @Html.HiddenFor(x => x.IdRespuesta, new { Value = Model.Respuesta.IdRespuesta })
+            </div>
+        </div>
+        <h2 align="center">Informe Individual</h2>
+        <div class="row">
+            <div class="col-md-4">
+                <p> <strong>Evaluado por:</strong> @Model.Evaluador.Name @Model.Evaluador.Name</p>
+            </div>
+            <div class="col-md-4">
+                <p> <strong>Email:</strong> @Model.Evaluador.Email</p>
+            </div>
+            <div class="col-md-4">
+                <p> <strong>Evaluado el:</strong> @Model.Respuesta.FechaCreacion</p>
+
+            </div>
+        </div>
+        <div class="col-md-3">
+            <table>
+                <tbody>
+                    <tr>
+                        <td style="width: 20%">
+                            <strong>Evaluado:</strong>
+                        </td>
+                        <td style="width: 80%">
+                            @Model.Evaluado.Name @Model.Evaluado.LastName
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="width: 20%">
+                            <strong>Identificación:</strong>
+                        </td>
+                        <td style="width: 80%">
+                            @Model.Evaluado.Identification
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="width: 20%">
+                            <strong>Email:</strong>
+                        </td>
+                        <td style="width: 80%">
+                            @Model.Evaluado.Email
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="width: 20%">
+                            <strong>Area:</strong>
+                        </td>
+                        <td style="width: 80%">
+                            @Model.Evaluado.NombreArea
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="width: 20%">
+                            <strong>Cargo:</strong>
+                        </td>
+                        <td style="width: 80%">
+                            @Model.Evaluado.NombreCargo
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <h3 align="center">Respuestas de @Model.Evaluacion.Nombre</h3>
+        <div align="center">Competencias</div>
+        <div class="row">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th style="width:50%">Competencias</th>
+                        <th>Nivel requerido</th>
+                        <th>Resultado Final</th>
+                        <th>Brecha</th>
+                        <th style="width:5%">Comentario</th>
+                        <th style="width:2%"></th>
+                    </tr>
+                </thead>
+                <tbody>  
+                    @foreach (var item in Model.Detalles)
+                    {
+                        <tr>
+                            <td><p>@item.EnunciadoPregunta</p></td>
+                            <td>
+                                @item.ValorRequerido
+                            </td>
+                            <td>
+                                @item.ResultadoFinal
+                            </td>
+                            <td>
+                                @item.Brecha
+                            </td>
+                            <td>
+                                @if (Convert.ToInt16(item.ResultadoFinal) >= 0 && Convert.ToInt16(item.ResultadoFinal) <= 69)
+                                {
+                                    <p>OPORTUNIDAD</p>
+                                }
+                                else if (Convert.ToInt16(item.ResultadoFinal) >= 70 && Convert.ToInt16(item.ResultadoFinal) <= 79)
+                                {
+                                    <p>DESARROLLADA</p>
+                                }
+                                else if (Convert.ToInt16(item.ResultadoFinal) >= 80 && Convert.ToInt16(item.ResultadoFinal) <= 100)
+                                {
+                                    <p>FORTALEZA</p>
+
+                                }
+                            </td>
+                            <td>
+                                @if (Convert.ToInt16(item.ResultadoFinal) >= 0 && Convert.ToInt16(item.ResultadoFinal) <= 69)
+                                {
+                                    <span class="fa fa-circle" style="color: red; font-size: 30px"></span>
+                                }
+                                else if (Convert.ToInt16(item.ResultadoFinal) >= 70 && Convert.ToInt16(item.ResultadoFinal) <= 79)
+                                {
+                                    <span class="fa fa-circle" style="color: yellow; font-size: 30px"></span>
+                                }
+                                else if (Convert.ToInt16(item.ResultadoFinal) >= 80 && Convert.ToInt16(item.ResultadoFinal) <= 100)
+                                {
+                                    <span class="fa fa-circle" style="color: green; font-size: 30px"></span>
+
+                                }
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+        <div class="row">
+            @{Html.RenderAction("_ReportePartial", Model);}
+        </div>
+    }
+    else
+    {
+        <h2 class="text-danger"> La respuesta no existe o fue deshabilitada</h2>        
+    }
+</form>

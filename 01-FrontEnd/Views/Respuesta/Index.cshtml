@@ -1,0 +1,93 @@
+﻿@{
+    ViewBag.Title = "Respuesta";
+}
+<h2>Respuesta</h2>
+<div id="example">
+    <div id="grid"></div>
+    <script>        
+        $(document).ready(function () {
+            var crudServiceBaseUrl = document.location,
+                dataSource = new kendo.data.DataSource({
+                    transport: {
+                        read: {
+                            url: '@Url.Action("Read","Respuesta")',
+                            dataType: "Json"
+                        },
+                        destroy: {
+                            url: '@Url.Action("Crud", "Respuesta", new {op="Delete"})',
+                            dataType: "Json"
+                        },
+                        parameterMap: function (options, operation) {                       
+                            if (operation !== "read" && options.models) {
+                                return { models: kendo.stringify(options.models) };
+                            }
+                            return true;
+                        }
+                    },
+                    requestEnd: function (e) {
+                        if (e.type === "update" || e.type === "create" || e.type === "Delete") {
+                            this.read();
+                        }
+                    },
+                    batch: true,                
+                    serverPaging: true,
+                    //serverFiltering: true,
+                    pageSize: 20,
+                    schema: {
+                        model: {
+                            id: "IdRespuesta",
+                            fields: {
+                                IdRespuesta: { type: "number", editable: false, validation: { min: 0 } },
+                                NombreEvaluacion: {editable:false},
+                                NombreEvaluador: { editable: false },
+                                NombreEvaluado: { editable: false }
+                            }
+                        }
+                    }
+                });
+
+            $("#grid").kendoGrid({
+                dataSource: dataSource,
+                sortable: true,
+                filterable: {
+                    messages: {
+                        info: "Filtro", // sets the text on top of the Filter menu
+                        filter: "Aplicar", // sets the text for the "Filter" button
+                        clear: "Borrar", // sets the text for the "Clear" button
+
+                        // when filtering boolean numbers
+                        isTrue: "Habilitado", // sets the text for "isTrue" radio button
+                        isFalse: "No Habilitado", // sets the text for "isFalse" radio button
+
+                        //changes the text of the "And" and "Or" of the Filter menu
+                        and: "Y",
+                        or: "O"
+                    },
+                    operators: {
+                        //filter menu for "string" type columns
+                        string: {
+                            eq: "Igual a",
+                            neq: "Distinto a",
+                            startswith: "Empieza por",
+                            contains: "Contiene",
+                            endswith: "Termina con"
+                        },
+                        //filter menu for foreign key values
+                        enums: {
+                            eq: "Igual a",
+                            neq: "Distinto a"
+                        }
+                    }
+                },               
+                columns: [
+                    { field: "IdRespuesta", title: "ID", width: 50, filterable: false},
+                    { field: "NombreEvaluacion", title:"Nombre Evaluacion"},
+                    { field: "NombreEvaluador", title: "Evaluador" },
+                    { field: "NombreEvaluado", title: "Evaluado" },
+                    { field: "IdRespuesta", title: "Detalles", filterable: false, template: "<a class='btn btn-info' href='" + crudServiceBaseUrl + "/DetRespuesta?RespuestaId=#:IdRespuesta#'>Ver Respuestas</a>" },
+                    { command: [{ className: "btn-destroy", name: "destroy", text: "Eliminar" }] }],
+                editable: "inline"
+            });
+        });
+    </script>
+</div>

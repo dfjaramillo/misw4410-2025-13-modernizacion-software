@@ -1,0 +1,113 @@
+﻿@model Model.Custom.EvaluacionGridView.EvaluacionUsuarioForGridView
+@using Model.Domain.Utils;
+@{
+    Layout = "~/Views/Shared/_LayoutEvaluador.cshtml";
+    ViewBag.Title = "Evaluacion Usuario";
+}
+<div class="card">
+    <div class="card-body text-justify">
+        <h1 align="center">@Model.Evaluacion.Nombre</h1>
+    </div>
+</div>
+<div class="row">
+    <div class="col-md-2">
+        <label class="font-weight-bold">Evaluado:</label>
+    </div>
+    <div class="col-md-2">
+        @Model.Evaluado.Name @Model.Evaluado.LastName
+    </div>
+    <div class="col-md-2">
+        <label class="font-weight-bold">Area:</label>
+    </div>
+    <div class="col-md-2">
+        @Model.Evaluado.NombreArea
+    </div>
+    <div class="col-md-2">
+        <label class="font-weight-bold">Cargo:</label>
+    </div>
+    <div class="col-md-2">
+        @Model.Evaluado.NombreCargo
+    </div>
+</div>
+<hr />
+@if (!string.IsNullOrEmpty(Model.EvaluacionDetalles.Where(x => x.EvaluacionDetalleItem == (int)EnumEvaluacionDetalleItem.Instrucciones).Select(x => x.Valor).FirstOrDefault()))
+{
+    <div class="row">
+        <div class="col-md-12">
+            <label class="font-weight-bold">Instrucciones:</label>
+        </div>
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-body text-justify">
+                    @Model.EvaluacionDetalles.Where(x => x.EvaluacionDetalleItem == (int)EnumEvaluacionDetalleItem.Instrucciones).Select(x => x.Valor).FirstOrDefault()
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+
+@{
+    var index = 0;
+    using (Html.BeginForm("EvaluacionUsuario", "Evaluacion", FormMethod.Post))
+    {
+        @Html.HiddenFor(m => m.Identificacion, new { Value = @CurrentUserHelper.Get.UserId })
+        @Html.HiddenFor(m => m.IdEvaluado, new { Value = Model.Evaluado.Id })
+        @Html.HiddenFor(m => m.IdEvaluacionAsignada, new { Value = @ViewBag.IdEvaluacionAsignada })
+        foreach (var evaluacionConfig in Model.EvaluacionConfig)
+        {
+            index = 0;
+            foreach (var formulario in evaluacionConfig.Formularios)
+            {
+                if (formulario.Preguntas != null && formulario.Preguntas.Count > 0 && formulario.Preguntas[index].PreguntaDetalle.Count > 0)
+                {
+                    <div class="row">
+                        <div class="col-md-12">
+                            <h3 align="center">@formulario.Nombre</h3>
+                        </div>
+                    </div>
+                    <div class="row">
+                        @foreach (var pregunta in formulario.Preguntas)
+                        {
+                            <div class="col-md-12 d-block p-2 bg-primary text-white" align="center">
+                                <h6> @pregunta.Titulo</h6>
+                            </div>
+                            <div class="col-md-12 border border-primary text-justify">
+                                @pregunta.Descripcion
+                            </div>
+                            <div class="col-md-12">
+                                <table class="table table-bordered table-striped">
+                                    @for (int i = 0; i < pregunta.PreguntaDetalle.Count; i++)
+                                    {
+                                        var question = Model.RespuestasModel.Questions[i];
+                                        <tr>
+                                            <td style="width: 82%"><label>@pregunta.PreguntaDetalle[i].Valor</label></td>
+                                            <td style="width: 18%">
+                                                @foreach (var answer in question.Value)
+                                                {
+
+                                                    <input type="hidden" name="Model.Answers[@pregunta.PreguntaDetalle[i].IdPreguntaDetalle].Key" value="@pregunta.PreguntaDetalle[i].IdPreguntaDetalle" />
+                                                    <input type="hidden" name="Model.Answers.Index" value="@pregunta.PreguntaDetalle[i].IdPreguntaDetalle" />
+
+                                                    @Html.RadioButton("Model.Answers[" + pregunta.PreguntaDetalle[i].IdPreguntaDetalle + "].Value", answer, false, new { required = "required" })@answer
+                                                }
+                                            </td>
+                                        </tr>
+                                    }
+                                </table>
+                            </div>
+                        }
+                    </div>
+                    index++;
+                }
+
+            }
+        }
+        <div class="pull-right">
+            <input type="submit" class="btn btn-primary" value="Guardar" />
+        </div>
+
+
+    }
+}
+</div>

@@ -1,0 +1,62 @@
+﻿<script type="text/javascript" src="~/Content/mdb/js/jquery-3.3.1.min.js"></script>
+<!-- Bootstrap tooltips -->
+<script type="text/javascript" src="~/Content/mdb/js/popper.min.js"></script>
+<!-- Bootstrap core JavaScript -->
+<script type="text/javascript" src="~/Content/mdb/js/bootstrap.min.js"></script>
+<!-- MDB core JavaScript -->
+<script type="text/javascript" src="~/Content/mdb/js/mdb.min.js"></script>
+
+<div class="col-md-6" style=" width: 50%; margin: 0 auto;">
+    <canvas id="radarChart"></canvas>
+    @Html.Hidden("Grafica", new { type = "image" })   
+</div>
+
+<script type="text/javascript">
+    //radar
+    var ctxR = document.getElementById("radarChart").getContext('2d');
+    var canvas = document.getElementById('radarChart');
+    $(document).ready(function () {
+        var myRadarChart = new Chart(ctxR, {
+            type: 'radar',
+            data: {
+                labels: [@Html.Raw(ViewBag.data.Data.Item1)],
+                datasets: [{
+                    label: "Resultados evaluación",
+                    data: [@ViewBag.data.Data.Item2],
+                    backgroundColor: [
+                        'rgba(105, 0, 132, .2)',
+                    ],
+                    borderColor: [
+                        'rgba(200, 99, 132, .7)',
+                    ],
+                    borderWidth: 2
+                },
+                {
+                    label: "Valor Requerido",
+                    data: [@ViewBag.data.Data.Item3],
+                    backgroundColor: [
+                        'rgba(0, 250, 220, .2)',
+                    ],
+                    borderColor: [
+                        'rgba(0, 213, 132, .7)',
+                    ],
+                    borderWidth: 2
+                }]
+            },
+            options: {
+                responsive: true
+            }
+        });
+        setTimeout(function () {           
+            document.getElementById("Grafica").value = myRadarChart.canvas.toDataURL();
+        },4000);
+        
+    });
+  
+
+    
+
+
+</script>
+
+

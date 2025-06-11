@@ -1,0 +1,73 @@
+﻿
+@{
+    ViewBag.Title = "Areas";
+}
+
+<h2>Administrar Areas</h2>
+
+<div id="grid"></div>
+
+<script>
+
+    $(document).ready(function () {
+
+        var dataSource = new kendo.data.DataSource({
+                transport: {
+                    read: {
+                        url: '@Url.Action("Read","Area")',
+                        dataType: "Json"
+                    },
+                    update: {
+                        url:'@Url.Action("Crud","Area",new {op="Update"})',
+                        dataType: "Json"
+                    },
+                    destroy: {
+                        url: '@Url.Action("Crud","Area",new {op="Delete"})',
+                        dataType: "Json"
+                    },
+                    create: {
+                        url: '@Url.Action("Crud","Area",new {op="Create"})',
+                        dataType: "Json"
+                    },
+                    parameterMap: function (options, operation) {
+                        if (operation !== "read" && options.models) {
+                            return { models: kendo.stringify(options.models) };
+                        }
+                    }
+                },
+                requestEnd: function (e) {
+                    if (e.type === "update" || e.type === "create") {
+                        this.read();
+                    }
+                },
+                batch: true,
+                pageSize: 20,
+                schema: {
+                    model: {
+                        id: "IdArea",
+                        fields: {
+                            IdArea: { type: "number", editable: false, validation: { min: 0 } },
+                            Name: { validation: { required: true } }
+                        }
+                    }
+                }
+            });
+
+        $("#grid").kendoGrid({
+            dataSource: dataSource,
+            navigatable: true,
+            pageable: true,
+            //height: 550,
+            toolbar: [
+                { name: 'create', text: 'Nuevo' },
+                { name: 'save', text: 'Guardar' },
+                { name: 'cancel', text: 'Descartar' }
+            ],
+            columns: [
+                { field: "IdArea", title: "ID", width: 40 },
+                { field: "Name", title: "Nombre Area" },
+                { command: "destroy", title: "Eliminar" }],
+            editable: true
+        });
+    });
+</script>

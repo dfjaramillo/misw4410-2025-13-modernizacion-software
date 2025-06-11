@@ -1,0 +1,194 @@
+﻿@model Model.Custom.EvaluacionGridView.EvaluacionAsignadaForGridView
+
+@{
+    ViewBag.Title = "Asignar Evaluación";
+}
+
+<h2>Asignar evaluación a evaluadores</h2>
+
+<div id="example">
+    <div id="grid"></div>
+    <script>
+
+
+        @{
+
+            string oProviderOptions = "[]";
+            if (Model.Evaluadores != null &&
+                Model.Evaluadores.Count > 0)
+            {
+                Dictionary<int, List<Model.Custom.Utils.CatalogModel>> oOptionContact =
+                    Model.Evaluadores.
+                    GroupBy(x => x.CatalogId).
+                    Select(x =>
+                        new
+                        {
+                            okey = x.Key,
+                            ovalue = Model.Evaluadores.Where(y => y.CatalogId == x.Key).OrderBy(y => y.ItemName).ToList(),
+                        }).ToDictionary(k => k.okey, v => v.ovalue);
+
+                oProviderOptions = (new System.Web.Script.Serialization.JavaScriptSerializer()).
+                    Serialize(oOptionContact.Select(x => new { Key = x.Key, Value = x.Value }));
+            }
+
+            string oEvaluaciones = "[]";
+            if (Model.Evaluaciones != null &&
+                Model.Evaluaciones.Count > 0)
+            {
+                Dictionary<int, List<Model.Custom.Utils.CatalogModel>> oEvaluacion =
+                    Model.Evaluaciones.
+                    GroupBy(x => x.CatalogId).
+                    Select(x =>
+                        new
+                        {
+                            okey = x.Key,
+                            ovalue = Model.Evaluaciones.Where(y => y.CatalogId == x.Key).OrderBy(y => y.ItemName).ToList(),
+                        }).ToDictionary(k => k.okey, v => v.ovalue);
+
+                oEvaluaciones = (new System.Web.Script.Serialization.JavaScriptSerializer()).
+                    Serialize(oEvaluacion.Select(x => new { Key = x.Key, Value = x.Value }));
+            }
+        }
+        var providerOptions = JSON.parse('@Html.Raw(oProviderOptions)');
+        var evaluationOptions = JSON.parse('@Html.Raw(oEvaluaciones)');
+        $(document).ready(function() {
+
+            if (providerOptions != null) {
+                $.each(providerOptions, function (item, value) {
+                    providerOptions[value.Key] = value.Value;
+                });
+            }
+
+            if (evaluationOptions != null) {
+                $.each(evaluationOptions, function (item, value) {
+                    evaluationOptions[value.Key] = value.Value;
+                });
+            }
+
+
+              var  dataSource = new kendo.data.DataSource({
+                    transport: {
+                        read: {
+                            url: '@Url.Action("ReadAsignado","Evaluacion")',
+                            dataType: "Json"
+                        },
+                        update: {
+                            url: '@Url.Action("CrudAsignado", "Evaluacion", new {op="Update"})',
+                            dataType: "Json"
+                        },
+                        destroy: {
+                            url: '@Url.Action("CrudAsignado", "Evaluacion", new {op="Delete"})',
+                            dataType: "Json"
+                        },
+                        create: {
+                            url: '@Url.Action("CrudAsignado", "Evaluacion", new {op="Create"})',
+                            dataType: "Json"
+                        },
+                        parameterMap: function(options, operation) {
+                            if (operation !== "read" && options.models) {
+                                return { models: kendo.stringify(options.models) };
+                            }
+                            return { models: kendo.stringify(options.models) };
+                        }
+                    },
+                    requestEnd: function(e) {
+                        if (e.type === "update" || e.type === "create") {
+                            this.read();
+                        }
+                    },
+                    batch: true,
+                    pageSize: 20,
+                    schema: {
+                        model: {
+                            id: "IdEvaluacionAsignada",
+                            fields: {
+                                IdEvaluacionAsignada: { type: "number", editable: false, validation: { min: 0 } },
+                                IdEvaluador: { editable: true, validation: { required: true } },
+                                IdEvaluacion:{ editable: true, validation: { required: true } }
+                            }
+                        }
+                    }
+                });
+
+
+            $("#grid").kendoGrid({
+                dataSource: dataSource,
+                navigatable: true,
+                pageable: true,
+                toolbar: [
+                    { name: 'create', text: 'Nuevo' },
+                    { name: 'save', text: 'Guardar' },
+                    { name: 'cancel', text: 'Descartar' }
+                ],
+                columns: [
+                    { field: "IdEvaluacionAsignada", title: "ID", width: 40  },
+                    {
+                        field: "IdEvaluador",
+                        title: "Evaluador",
+                        editor: categoryDropDownEditor,
+                        template: function (dataItem) {
+
+                            var oReturn = 'Seleccione una opción.';
+                            if (dataItem != null && dataItem.IdEvaluador != null) {
+
+                                $.each(providerOptions[@Convert.ToInt32(2)], function (item, value) {
+                                    if (dataItem.IdEvaluador === value.ItemIdString) {
+                                        oReturn = value.ItemName;
+                                    }
+                                });
+
+                            }
+                            return oReturn;
+                        }
+                    },
+                    {
+                        field: "IdEvaluacion",
+                        title: "Evaluación",
+                        editor: categoryDropDownEditor2,
+                        template: function (dataItem) {
+
+                            var oReturn = 'Seleccione una opción.';
+                            if (dataItem != null && dataItem.IdEvaluacion != null) {
+
+                                $.each(evaluationOptions[@Convert.ToInt16(1)], function (item, value) {
+                                    if (dataItem.IdEvaluacion === value.ItemId) {
+                                        oReturn = value.ItemName;
+                                    }
+                                });
+
+                            }
+                            return oReturn;
+                        }
+                    },
+                    { field: "IdEvaluacionAsignada", title: "Asignar Usuarios", template: "<a class='btn btn-info' href='" + '@Url.Action("AsignarUsuario","Users")' +"?id=#:IdEvaluacionAsignada#&IdEvaluador=#:IdEvaluador#'>Asignar</a>" },
+                    { command: [{ className: "btn-destroy", name: "destroy", text: "Eliminar" }]}
+                ],
+                editable: true
+            });
+
+            function categoryDropDownEditor(container, options) {
+                $('<input required data-bind="value:' + options.field + '"/>')
+                    .appendTo(container)
+                    .kendoDropDownList({
+                        autoBind: false,
+                        dataTextField: "ItemName",
+                        dataValueField: "ItemIdString",
+                        dataSource: providerOptions[@Convert.ToInt16(2)],
+                        optionLabel: 'Seleccione una opción'
+                    });
+            }
+            function categoryDropDownEditor2(container, options) {
+
+                $('<input required data-bind="value:' + options.field + '"/>')
+                    .appendTo(container)
+                    .kendoDropDownList({
+                        autoBind: false,
+                        dataTextField: "ItemName",
+                        dataValueField: "ItemId",
+                        dataSource: evaluationOptions[@Convert.ToInt16(1)],
+                        optionLabel: 'Seleccione una opción'
+                    });
+            }
+        });
+    </script>
+</div>

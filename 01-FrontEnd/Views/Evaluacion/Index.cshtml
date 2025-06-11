@@ -1,0 +1,79 @@
+﻿@{
+    ViewBag.Title = "Evaluaciones";
+}
+
+<div class="jumbotron">
+    <h1>Evaluaciones</h1>
+    <p class="lead">Cree la evalución asignandole un nombre</p>
+    <div id="grid"></div>
+</div>
+
+
+<script>
+
+    $(document).ready(function () {
+        var crudServiceBaseUrl = document.location,
+            dataSource = new kendo.data.DataSource({
+                transport: {
+                    read: {
+                        url: '@Url.Action("Read","Evaluacion")',
+                        dataType: "Json"
+                    },
+                    update: {
+                        url: '@Url.Action("Crud","Evaluacion",new {op="Update"})',
+                        dataType: "Json"
+                    },
+                    destroy: {
+                        url: '@Url.Action("Crud","Evaluacion",new {op="Delete"})',
+                        dataType: "Json"
+                    },
+                    create: {
+                        url: '@Url.Action("Crud","Evaluacion",new {op="Create"})',
+                        dataType: "Json"
+                    },
+                    parameterMap: function (options, operation) {
+                        if (operation !== "read" && options.models) {
+                            return { models: kendo.stringify(options.models) };
+                        }
+                    }
+                },
+                requestEnd: function (e) {
+                    if (e.type === "update" || e.type === "create") {
+                        this.read();
+                    }
+                },
+                batch: true,
+                pageSize: 20,
+                schema: {
+                    model: {
+                        id: "IdEvaluacion",
+                        fields: {
+                            IdEvaluacion: { type: "number", editable: false, validation: { min: 0 } },
+                            Nombre: { validation: { required: true } },
+                        }
+                    }
+                }
+            });
+
+        $("#grid").kendoGrid({
+            dataSource: dataSource,
+            navigatable: true,
+            pageable: true,
+            //height: 550,
+            toolbar: [
+                { name: 'create', text: 'Nuevo' },
+                { name: 'save', text: 'Guardar' },
+                { name: 'cancel', text: 'Descartar' }
+            ],
+            columns: [
+                { field: "IdEvaluacion", title: "ID", width: 40 },
+                { field: "Nombre", title: "Nombre Evaluación" },
+                { field: "IdEvaluacion", title: "Detalles", template: "<a class='btn btn-info' href='" + '@Url.Action("EvalDetalles","Evaluacion")' + "?id=#:IdEvaluacion#'>Detalles Evaluación</a>" },
+                { field: "IdEvaluacion", title: "Configuración", template: "<a class='btn btn-info' href='" + '@Url.Action("EvalConfig", "Evaluacion")' + "?id=#:IdEvaluacion#'>Configurar Evaluación</a>" },
+                { command: [{ className: "btn-destroy", name: "destroy", text: "Eliminar" }]}],
+            editable: true
+        });
+       
+    });
+</script>
+

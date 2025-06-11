@@ -1,0 +1,90 @@
+﻿@using System.Collections.Generic;
+@model List<Model.Custom.EvaluadorGridView.EvaluadorForGridView>
+@{
+    Layout = "~/Views/Shared/_LayoutEvaluador.cshtml";
+}
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <link href="~/content/template/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+    <script src="~/Scripts/kendo/2014.1.318/jquery.min.js"></script>
+    <script src="~/content/template/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+
+    <title>IndexEvaluador</title>
+</head>
+<body>
+    <div>
+        <h1>Evaluaciones Asignadas</h1>
+    </div>
+    <hr />
+    <div class="row">
+        @if (Model.Any())
+        {
+            foreach (var itemGridView in Model)
+            {
+                if (itemGridView.Evaluacion != null)
+                {
+                    <div class="col-md-12">
+                        <h3> @itemGridView.Evaluacion.Nombre</h3>
+                    </div>
+
+                    <div class="col-md-12">
+                        <table class="table table-bordered">
+                            <thead>
+                                <tr>
+                                    <th style="width:50%">
+                                        Nombre del usuario a evaluar
+                                    </th>
+                                    <th style="width:40%">
+                                        Correo Electrónico
+                                    </th>
+                                    <th style="width:10%">
+                                        Evaluar
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @if (itemGridView.Usuarios.Any())
+                                {
+                                    foreach (var usuario in itemGridView.Usuarios)
+                                    {
+                                        <tr>
+                                            <td>
+                                                @($"{usuario.Nombre} {usuario.Apellido}")
+                                            </td>
+                                            <td>
+                                                @usuario.Email
+                                            </td>
+                                            <td>
+                                                <a class='btn btn-info' href='@Url.Action("EvaluacionUsuario", "Evaluacion", new { idE = itemGridView.Evaluacion.IdEvaluacion
+                                                                             ,idEA = itemGridView.EvaluacionesAsignadas.IdEvaluacionAsignada
+                                                                             ,idU = usuario.Id, option = "Load"
+                                                                             ,idA = itemGridView.UsuariosAsignados.Where(x => x.IdEvaluado == usuario.Id).Select(x => x.IdUsuarioAsignado).FirstOrDefault() })'>Evaluar</a>
+                                            </td>
+                                        </tr>
+                                    }
+                                }
+                                else
+                                {
+                                    <tr>
+                                        <td colspan="3"><h5 style="color:red">La evalución no tiene usuarios asignados</h5></td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+                else
+                {
+                    <h4>No tiene evaluaciones asignadas</h4>
+                }
+            }
+        }
+        else
+        {
+            <h4>No tiene evaluaciones asignadas</h4>
+        }
+    </div>
+</body>
+</html>

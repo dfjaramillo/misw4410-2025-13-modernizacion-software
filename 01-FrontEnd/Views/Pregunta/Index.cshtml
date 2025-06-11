@@ -1,0 +1,77 @@
+﻿@{
+    ViewBag.Title = "Preguntas";
+}
+
+<h2>Preguntas</h2>
+
+<div id="example">
+    <div id="grid"></div>
+
+    <script>
+
+        $(document).ready(function () {
+
+           var dataSource = new kendo.data.DataSource({
+                    transport: {
+                        read: {
+                            url: '@Url.Action("Read","Pregunta", new {id=ViewBag.FormId})',
+                            dataType: "Json"
+                        },
+                        update: {
+                            url: '@Url.Action("Crud","Pregunta", new {op="Update",id=ViewBag.FormId})',
+                            dataType: "Json"
+                        },
+                        destroy: {
+                            url: '@Url.Action("Crud","Pregunta", new {op="Delete",id=ViewBag.FormId})',
+                            dataType: "Json"
+                        },
+                        create: {
+                            url: '@Url.Action("Crud","Pregunta", new {op="Create",id=ViewBag.FormId})',
+                            dataType: "Json"
+                        },
+                        parameterMap: function (options, operation) {
+                            if (operation !== "read" && options.models) {
+                                return { models: kendo.stringify(options.models) };
+                            }
+                        }
+                    },
+                    requestEnd: function (e) {
+                        if (e.type === "update" || e.type === "create") {
+                            this.read();
+                        }
+                    },
+                    batch: true,
+                    pageSize: 20,
+                    schema: {
+                        model: {
+                            id: "IdPregunta",
+                            fields: {
+                                IdPregunta: { type: "number", editable: false, validation: { min: 0 } },
+                                Titulo: { validation: { required: true } },
+                                Descripcion: { validation: { required: false } }
+                            }
+                        }
+                    }
+                });
+
+            $("#grid").kendoGrid({
+                dataSource: dataSource,
+                navigatable: true,
+                pageable: true,
+                height: 550,
+                toolbar: [
+                    { name: 'create', text: 'Nuevo' },
+                    { name: 'save', text: 'Guardar' },
+                    { name: 'cancel', text: 'Descartar' }
+                ],
+                columns: [
+                    { field: "IdPregunta", title: "ID", width: 40 },
+                    { field: "Titulo", title: "Titulo Pregunta" },
+                    { field: "Descripcion", title: "Descripción" },
+                    { field: "IdPregunta", title: "Detalles de la pregunta", template: "<a class='btn btn-info' href='" + '@Url.Action("DetPregunta","Pregunta")' + "?id=#:IdPregunta#'> Agregar Enunciados</a>" },
+                    { command: [{ className: "btn-destroy", name: "destroy", text: "Eliminar" }] }],
+                editable: true
+            });
+        });
+    </script>
+</div>

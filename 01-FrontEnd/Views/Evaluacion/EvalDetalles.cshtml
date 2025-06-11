@@ -1,0 +1,146 @@
+﻿@using Model.Domain.Utils
+@model Model.Custom.EvaluacionGridView.EvaluacionDetalleForGridView
+
+@{
+    ViewBag.Title = "Detalles de la Evaluación";
+}
+
+<h2>Detalles de la Evaluación</h2>
+
+
+<div id="example">
+    <div id="grid"></div>
+    <script>
+
+
+        @{
+
+            string oProviderOptions = "[]";
+            if (Model.DetallesItem != null &&
+                Model.DetallesItem.Count > 0)
+            {
+                Dictionary<int, List<Model.Custom.Utils.CatalogModel>> oOptionContact =
+                    Model.DetallesItem.
+                    GroupBy(x => x.CatalogId).
+                    Select(x =>
+                        new
+                        {
+                            okey = x.Key,
+                            ovalue = Model.DetallesItem.Where(y => y.CatalogId == x.Key).OrderBy(y => y.ItemName).ToList(),
+                        }).ToDictionary(k => k.okey, v => v.ovalue);
+
+                oProviderOptions = (new System.Web.Script.Serialization.JavaScriptSerializer()).
+                    Serialize(oOptionContact.Select(x => new { Key = x.Key, Value = x.Value }));
+            }
+        }
+        var providerOptions =  JSON.parse('@Html.Raw(oProviderOptions)');
+        $(document).ready(function() {
+
+
+
+            if (providerOptions != null) {
+                $.each(providerOptions, function (item, value) {
+                    providerOptions[value.Key] = value.Value;
+                });
+            }
+            
+            var  dataSource = new kendo.data.DataSource({
+                    transport: {
+                        read: {
+                            url: '@Url.Action("ReadDet","Evaluacion", new {id= ViewBag.IdEvaluacion })',
+                            dataType: "Json"
+                        },
+                        update: {
+                            url: '@Url.Action("CrudDet","Evaluacion", new {op="Update", id=ViewBag.IdEvaluacion})',
+                            dataType: "Json"
+                        },
+                        destroy: {
+                            url: '@Url.Action("CrudDet","Evaluacion", new {op="Delete", id=ViewBag.IdEvaluacion})',
+                            dataType: "Json"
+                        },
+                        create: {
+                            url: '@Url.Action("CrudDet","Evaluacion", new {op="Create", id=ViewBag.IdEvaluacion})',
+                        },
+                        parameterMap: function(options, operation) {
+                            if (operation !== "read" && options.models) {
+                                return { models: kendo.stringify(options.models) };
+                            }
+                        }
+                    },
+                    requestEnd: function(e) {
+                        if (e.type == "update" || e.type == "create") {
+                            this.read();
+                        }
+                    },
+                    batch: true,
+                    pageSize: 20,
+                    schema: {
+                        model: {
+                            id: "IdEvaluacionDetalle",
+                            fields: {
+                                IdEvaluacionDetalle: { type: "number", editable: false, validation: { min: 0 } },
+                                IdEvaluacion: { type: "number", editable: false },
+                                EvaluacionDetalleItem:{ editable: true, validation: { required: true } },
+                                Valor: { validation: { required: true } }
+                            }
+                        }
+                    }
+                });
+
+
+            $("#grid").kendoGrid({
+                dataSource: dataSource,
+                navigatable: true,
+                pageable: true,
+                toolbar: [
+                    { name: 'create', text: 'Nuevo' },
+                    { name: 'save', text: 'Guardar' },
+                    { name: 'cancel', text: 'Descartar' }
+                ],
+                columns: [
+                    { field: "IdEvaluacionDetalle", title: "ID", width: 40  },
+                    {
+                        field: "EvaluacionDetalleItem",
+                        title: "Tipo Detalle",
+                        editor: categoryDropDownEditor,
+                        template:
+                        function(dataItem) {
+
+                            var oReturn = 'Seleccione una opción.';
+                            if (dataItem != null && dataItem.EvaluacionDetalleItem != null) {
+                                $.each(providerOptions[@Convert.ToInt16(EnumEvaluacionCatalogo.EvaluacionDetalle)],
+                                    function(item, value) {
+                                        if (dataItem.EvaluacionDetalleItem.ItemId !=null && dataItem.EvaluacionDetalleItem.ItemId===value.ItemId) {
+                                            oReturn = value.ItemName;
+                                        }
+                                        if (dataItem.EvaluacionDetalleItem === value.ItemId) {
+                                            oReturn = value.ItemName;
+                                        }
+                                    });
+                            }
+                            return oReturn;
+                        }
+                    },
+                    { field: "Valor", title: "Valor" },
+                    { command: [{ className: "btn-destroy", name: "destroy", text: "Eliminar" }]}
+                ],
+                editable: true
+            });
+
+            function categoryDropDownEditor(container, options) {
+
+                $('<input required data-bind="value:' + options.field + '"/>')
+                    .appendTo(container)
+                    .kendoDropDownList({
+                        autoBind: false,
+                        dataTextField: "ItemName",
+                        dataValueField: "ItemId",
+                        dataSource: providerOptions[@Convert.ToInt16(EnumEvaluacionCatalogo.EvaluacionDetalle)],
+                        optionLabel: 'Seleccione una opción'
+                    });
+            }
+
+        });
+
+    </script>
+</div>
